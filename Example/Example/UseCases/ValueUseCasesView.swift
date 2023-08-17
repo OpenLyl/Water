@@ -8,11 +8,12 @@ import Water
 
 struct ValueUseCasesView: View {
     var body: some View {
-        CounterView()
+//        CounterView()
 //        CounterNameView()
 //        BooleanValueView()
 //        ValueNotChangeView()
 //        SimultaneousChangeValuesView()
+        ShowPasswordView()
     }
 }
 
@@ -181,6 +182,58 @@ extension ValueUseCasesView {
             }
             Text("the name = \(name.value)")
             TextField("name", text: name.bindable)
+        }
+    }
+}
+
+extension ValueUseCasesView {
+//    struct ShowPasswordView: View {
+//        @State private var showPassword = false
+//        let pwd = "123456"
+//
+//        var password: String {
+//            if showPassword {
+//                return pwd
+//            } else {
+//                return String(repeating: "*", count: pwd.count)
+//            }
+//        }
+//
+//        var body: some View {
+//            VStack {
+//                HStack {
+//                    Text("password")
+//                    Text(password)
+//                }
+//                Button("change show password") {
+//                    showPassword.toggle()
+//                }
+//            }
+//        }
+//    }
+    
+    func ShowPasswordView() -> some View {
+        let showPassword = defValue(false)
+        let pwd = "123456"
+        
+        var password: String {
+            if showPassword.value {
+                return pwd
+            } else {
+                return String(repeating: "*", count: pwd.count)
+            }
+        }
+        
+        return View {
+            VStack {
+                HStack {
+                    Text("password")
+                    Text(password)
+                }
+                Button("change show password") {
+                    showPassword.value.toggle()
+                }
+            }
         }
     }
 }

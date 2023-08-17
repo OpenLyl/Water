@@ -6,80 +6,52 @@
 import Foundation
 
 @dynamicMemberLookup
-public class ReactiveObject<T> {
-    private var _target: T
-    private var effects: [AnyKeyPath: [any Effectable]] = [:]
-    private var watchEffects: [any Effectable] = []
+public class ReactiveObject<T>: Reactor {
+    var _target: T
+    
+    private var _reactiveHandler: ReactiveHandler
+    
+    init(target: T, handler: ReactiveHandler) {
+        _target = target
+        _reactiveHandler = handler
+    }
     
     public var target: T {
         get {
-            if checkObjectIsClass(_target) {
-                trackObjectEffects()
-            }
-            return _target
+            _reactiveHandler.handleGetTarget(self)
         }
         set {
-            if checkObjectIsClass(_target) {
-                if sameObject(lhs: _target, rhs: newValue) {
-                    return
-                }
-                _target = newValue
-                triggerObjectEffects()
-            } else {
-                _target = newValue
-            }
+            _reactiveHandler.handleSetTarget(self, newValue)
         }
-    }
-
-    init(target: T) {
-        self._target = target
-    }
-
-    deinit {
-//        print("deinit reactive object, value = \(target)")
     }
     
-    public subscript<V>(dynamicMember keyPath: WritableKeyPath<T, V>) -> V {
+    public subscript<V>(dynamicMember keyPath: KeyPath<T, V>) -> V {
         get {
-            print("get keyPath \(keyPath)")
-            trackPropertyEffects(keyPath)
-            return target[keyPath: keyPath]
+//            print("get keyPath \(keyPath)")
+            _reactiveHandler.handleGetProperty(of: self, at: keyPath)
         }
         set {
-            print("set keyPath \(keyPath)")
-            let oldValue = target[keyPath: keyPath]
-            if match(lhs: oldValue, rhs: newValue) {
-                return
+//            print("set keyPath \(keyPath) - new value = \(newValue)")
+            if let keyPath = keyPath as? WritableKeyPath<T, V> {
+                _reactiveHandler.handleSetProperty(of: self, at: keyPath, with: newValue)
+            } else {
+                fatalError("the key path is not writable")
             }
-            target[keyPath: keyPath] = newValue
-            triggerPropertyEffects(keyPath)
         }
     }
     
     public func unwrap() -> T {
-        return target
+        _target
     }
 }
 
-// MARK: - effect
-
-extension ReactiveObject: Reactor {
-    func trackObjectEffects() {
-        track(reactor: self)
+extension ReactiveObject {
+    public var isReadonly: Bool {
+        _reactiveHandler.isReadonly
     }
     
-    func triggerObjectEffects() {
-        trigger(reactor: self)
-        // TODO: - need trigger watch effect
-    }
-    
-    func trackPropertyEffects(_ keyPath: AnyKeyPath) {
-        track(reactor: self, at: keyPath)
-    }
-
-    func triggerPropertyEffects(_ keyPath: AnyKeyPath) {
-        trigger(reactor: self, at: keyPath)
-        trigger(reactor: self) // also trigger the watch effect
+    public var isReactive: Bool {
+        !_reactiveHandler.isReadonly
     }
 }
 
@@ -88,18 +60,18 @@ extension ReactiveObject: Reactor {
 public struct PropertyWatcher<T, V>: Watchable {
     let source: ReactiveObject<T>
     let keyPath: WritableKeyPath<T, V>
-    
+
     public func watch() -> V {
-        source.trackPropertyEffects(keyPath)
-        return source.target[keyPath: keyPath]
+        source.trackEffects(at: keyPath) // only track effect with keypath
+        return source._target[keyPath: keyPath]
     }
 }
 
 public struct PropertyWatchTrackClosureWrapper<T>: Watchable {
     let watchTrackClosure: WatchTracker<T>
-    
+
     public func watch() -> T {
-        return watchTrackClosure()
+        watchTrackClosure()
     }
 }
 
@@ -113,6 +85,13 @@ extension ReactiveObject: Watchable {
 // MARK: - def
 
 public func defReactive<T>(_ target: T) -> ReactiveObject<T> {
-    let reactive = ReactiveObject(target: target)
-    return reactive
+    createReactiveObject(target, mutableHandler)
+}
+
+public func defReadonly<T>(_ target: T) -> ReactiveObject<T> {
+    createReactiveObject(target, readonlyHandler)
+}
+
+func createReactiveObject<T>(_ target: T, _ handler: ReactiveHandler) -> ReactiveObject<T> {
+    ReactiveObject(target: target, handler: handler)
 }

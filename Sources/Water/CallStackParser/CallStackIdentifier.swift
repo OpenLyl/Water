@@ -40,6 +40,18 @@ func findViewIdentifier(from callStackSymbols: [String]) -> String {
 }
 
 func checkIdentifier(identifier: String) -> Bool {
-    let identifierLast2Char = identifier.suffix(2)
-    return String(identifierLast2Char) == "()"
+    do {
+        let pattern = #"\(|\)"# // Regular expression pattern for "(" or ")"
+        let regex = try NSRegularExpression(pattern: pattern)
+        let range = NSRange(location: 0, length: identifier.utf16.count)
+
+        if regex.firstMatch(in: identifier, options: [], range: range) != nil {
+            return true
+        } else {
+            return false
+        }
+    } catch {
+        print("Error creating regular expression: \(error)")
+        return false
+    }
 }

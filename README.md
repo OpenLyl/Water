@@ -38,9 +38,9 @@ func CounterView() -> some View {
 * [Middlewares](#middlewares)
 * [Integration with existing projects](#integration-with-existing-projects)
 * [Examples](#examples)
-* [Compare other frameworks](#compare-other-frameworks)
+* [Compare with X](#compare-with-x)
 * [Community](#community)
-* [Contributors](#contributors)
+* [Contribution](#contribution)
 * [Thanks](#thanks)
 * [License](#license)
 
@@ -515,7 +515,7 @@ struct CountereView: View {
 - Garden (Mastodon client) - under development
 - Other TCA examples - under development
 
-## Compare other frameworks
+## Compare with X
 
 **compare with swift-composable-architecture**
 

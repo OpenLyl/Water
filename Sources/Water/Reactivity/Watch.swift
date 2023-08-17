@@ -56,8 +56,8 @@ public func defWatch<T, Source: Watchable>(_ source: Source, onChange watchCallb
 @discardableResult
 public func defWatch<T, V>(_ source: ReactiveObject<T>, at keyPath: WritableKeyPath<T, V>, onChange watchCallback: @escaping WatchCallback<V>) -> WatchStopHandle {
     defWatch({
-        source.trackPropertyEffects(keyPath)
-        return source.target[keyPath: keyPath]
+        source.trackEffects(at: keyPath)
+        return source._target[keyPath: keyPath]
     }, onChange: watchCallback)
 }
 

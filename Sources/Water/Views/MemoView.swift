@@ -32,6 +32,6 @@ public struct MemoView<P, Content: View>: View, Equatable {
     }
     
     public static func == (lhs: MemoView<P, Content>, rhs: MemoView<P, Content>) -> Bool {
-        return match(lhs: lhs.props, rhs: rhs.props)
+        return sameValue(lhs: lhs.props, rhs: rhs.props)
     }
 }

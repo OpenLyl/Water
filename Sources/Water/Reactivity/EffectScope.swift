@@ -8,7 +8,7 @@ var activeEffectScope: EffectScope? = nil
 public class EffectScope {
     private let _active = true
     
-    let effects: [any Effectable] = []
+    let effects: [AnyEffect] = []
     
     var parent: EffectScope? = nil
     let children: [EffectScope]? = nil

@@ -8,7 +8,7 @@
 
 // MARK: - global Variables
 
-var activeEffect: (any Effectable)?
+var activeEffect: AnyEffect?
 
 var shouldTrack: Bool = false
 var canTrack: Bool {
@@ -19,6 +19,8 @@ var canTrack: Bool {
 
 public typealias Scheduler = () -> Void
 public typealias OnStop = () -> Void
+public typealias AnyEffect = any Effectable
+typealias AnyReactor = any Reactor
 
 public protocol Effectable: AnyObject {
     associatedtype T
@@ -51,7 +53,7 @@ public class ReactiveEffect<T>: Effectable {
     var onStop: OnStop?
     
     private var isActive = true
-    private var parent: (any Effectable)? = nil
+    private var parent: AnyEffect? = nil
 
     init(_ fn: @escaping () -> T, _ scheduler: Scheduler? = nil, _ onStop: OnStop? = nil) {
         self.fn = fn
@@ -87,7 +89,7 @@ public class ReactiveEffect<T>: Effectable {
         return res
     }
     
-    func stop(with target: (any Reactor)? = nil) {
+    func stop(with target: AnyReactor? = nil) {
         if !isActive {
             return;
         }
@@ -118,10 +120,10 @@ public struct ReactiveEffectRunner<T> {
     let effect: ReactiveEffect<T>
     
     func run() -> T {
-        return effect.run(track: false)
+        effect.run(track: false)
     }
     
-    func stop(with target: (any Reactor)? = nil) {
+    func stop(with target: AnyReactor? = nil) {
         effect.stop(with: target)
     }
 }
@@ -130,17 +132,37 @@ public func stop<T>(_ runner: ReactiveEffectRunner<T>) {
     runner.stop()
 }
 
-public func stop<T>(_ reactor: any Reactor, _ runner: ReactiveEffectRunner<T>) {
-    runner.stop(with: reactor)
-}
-
 // MARK: - track and trigger reactor
 
-public protocol Reactor: AnyObject {
-    
+protocol Reactor: AnyObject {
+    func trackEffects()
+    func triggerEffects()
+    func trackEffects(at keyPath: AnyKeyPath)
+    func triggerEffects(at keyPath: AnyKeyPath)
 }
 
-func trackEffects(_ effects: inout [any Effectable]) {
+// FIXME: - this default implements abstract from ReactiveObject, need reconsider
+extension Reactor {
+    func trackEffects() {
+        track(reactor: self)
+    }
+    
+    func triggerEffects() {
+        trigger(reactor: self)
+        // TODO: - need trigger watch effect
+    }
+    
+    func trackEffects(at keyPath: AnyKeyPath) {
+        track(reactor: self, at: keyPath)
+    }
+    
+    func triggerEffects(at keyPath: AnyKeyPath) {
+        trigger(reactor: self, at: keyPath)
+        trigger(reactor: self) // also trigger the watch effect
+    }
+}
+
+func trackEffects(_ effects: inout [AnyEffect]) {
     guard canTrack else {
         return
     }
@@ -153,7 +175,7 @@ func trackEffects(_ effects: inout [any Effectable]) {
     effects.append(currentEffect)
 }
 
-func triggerEffects(_ effects: [any Effectable]) {
+func triggerEffects(_ effects: [AnyEffect]) {
     for effect in effects {
         if let scheduler = effect.scheduler {
             scheduler()
@@ -164,20 +186,20 @@ func triggerEffects(_ effects: [any Effectable]) {
 }
 
 struct ReactorEffectMap {
-    let reactor: any Reactor
-    var effects: [any Effectable] = []
+    let reactor: AnyReactor
+    var effects: [AnyEffect] = []
 }
 
 struct ReactorKeyPathEffectMap {
-    let reactor: any Reactor
+    let reactor: AnyReactor
     let keyPath: AnyKeyPath
-    var effects: [any Effectable] = []
+    var effects: [AnyEffect] = []
 }
 
 var globalEffects: [ReactorEffectMap] = []
 var globalKeyPathEffects: [ReactorKeyPathEffectMap] = []
 
-func track(reactor: any Reactor) {
+func track(reactor: AnyReactor) {
     var currentReactorMap: ReactorEffectMap
     
     let index = globalEffects.firstIndex { $0.reactor === reactor }
@@ -199,7 +221,7 @@ func track(reactor: any Reactor) {
     }
 }
 
-func trigger(reactor: any Reactor) {
+func trigger(reactor: AnyReactor) {
     guard let currentReactorMap = globalEffects.filter({ $0.reactor === reactor }).first else {
         return
     }
@@ -207,7 +229,7 @@ func trigger(reactor: any Reactor) {
     triggerEffects(currentReactorEffects)
 }
 
-func track(reactor: any Reactor, at keyPath: AnyKeyPath) {
+func track(reactor: AnyReactor, at keyPath: AnyKeyPath) {
     var currentReactorKeyPathMap: ReactorKeyPathEffectMap
     
     let index = globalKeyPathEffects.firstIndex { $0.reactor === reactor && $0.keyPath === keyPath }
@@ -229,7 +251,7 @@ func track(reactor: any Reactor, at keyPath: AnyKeyPath) {
     }
 }
 
-func trigger(reactor: any Reactor, at keyPath: AnyKeyPath) {
+func trigger(reactor: AnyReactor, at keyPath: AnyKeyPath) {
     guard let currentTargetKeyPathMap = globalKeyPathEffects.filter({ $0.reactor === reactor && $0.keyPath === keyPath}).first else {
         return
     }
@@ -237,7 +259,7 @@ func trigger(reactor: any Reactor, at keyPath: AnyKeyPath) {
     triggerEffects(currentTargetKeyPathEffects)
 }
 
-func cleanupEffect(_ effect: any Effectable, with target: (any Reactor)? = nil) {
+func cleanupEffect(_ effect: AnyEffect, with target: AnyReactor? = nil) {
     if let target {
         if let index = globalEffects.firstIndex(where: {$0.reactor === target }) {
             cleanupGlobalEffects(effect: effect, at: index)
@@ -257,7 +279,7 @@ func cleanupEffect(_ effect: any Effectable, with target: (any Reactor)? = nil) 
     }
 }
 
-func cleanupGlobalEffects(effect: any Effectable, at index: Int) {
+func cleanupGlobalEffects(effect: AnyEffect, at index: Int) {
     var reactorMap = globalEffects[index]
     var reactorEffects = reactorMap.effects
     reactorEffects.removeAll { $0 === effect }
@@ -265,7 +287,7 @@ func cleanupGlobalEffects(effect: any Effectable, at index: Int) {
     globalEffects[index] = reactorMap
 }
 
-func cleanupGlobalKeyPathEffects(effect: any Effectable, at index: Int) {
+func cleanupGlobalKeyPathEffects(effect: AnyEffect, at index: Int) {
     var reactorKeyPathMap = globalKeyPathEffects[index]
     var reactorKeyPathEffects = reactorKeyPathMap.effects
     reactorKeyPathEffects.removeAll { $0 === effect }

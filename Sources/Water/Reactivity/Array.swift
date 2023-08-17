@@ -5,32 +5,24 @@
 
 import Foundation
 
-public class ReactiveArray<T>: RandomAccessCollection, ExpressibleByArrayLiteral {
+public class ReactiveArray<T>: RandomAccessCollection, Reactor {
     public typealias Element = T
 
-    private var _array: [T]
-    private var effects: [any Effectable] = []
+    var _array: [T]
+    var _reactiveHandler: ReactiveHandler
 
-    public required init() {
-        _array = []
-    }
 
-    public init(array: [T]) {
+    init(array: [T], handler: ReactiveHandler) {
         _array = array
-    }
-
-    public required init(arrayLiteral elements: Element...) {
-        _array = elements
+        _reactiveHandler = handler
     }
 
     public var array: [T] {
         get {
-            trackArrayEffects()
-            return _array
+            _reactiveHandler.handleGetArray(self)
         }
         set {
-            _array = newValue
-            triggerArrayEffects()
+            _reactiveHandler.handleSetArray(self, newValue)
         }
     }
 
@@ -41,8 +33,8 @@ public class ReactiveArray<T>: RandomAccessCollection, ExpressibleByArrayLiteral
         }
         set {
 //            print("set value index = \(index) with new value = \(newValue)")
-            replaceSubrange(index ..< index + 1, with: [newValue])
-            array[index] = newValue
+            replaceSubrange(index ..< index + 1, with: [newValue]) // FIXME: - only need once
+//            array[index] = newValue // FIXME: - need check this
         }
     }
 
@@ -90,6 +82,7 @@ public class ReactiveArray<T>: RandomAccessCollection, ExpressibleByArrayLiteral
         replaceSubrange(index ..< index, with: newElements)
     }
 
+    // FIXME: - test trigger once
     @discardableResult
     public func remove(at index: Int) -> T {
         let element = _array[index]
@@ -138,11 +131,21 @@ public class ReactiveArray<T>: RandomAccessCollection, ExpressibleByArrayLiteral
     }
 
     private func compare(lhs: T, rhs: T) -> Bool {
-        match(lhs: lhs, rhs: rhs)
+        sameValue(lhs: lhs, rhs: rhs)
     }
     
     public func unwrap() -> [T] {
-        return _array
+        _array
+    }
+}
+
+extension ReactiveArray {
+    public var isReadonly: Bool {
+        _reactiveHandler.isReadonly
+    }
+    
+    public var isReactive: Bool {
+        !_reactiveHandler.isReadonly
     }
 }
 
@@ -150,19 +153,7 @@ public class ReactiveArray<T>: RandomAccessCollection, ExpressibleByArrayLiteral
 
 extension ReactiveArray where T == String {
     func joined(separator: String = "") -> String {
-        return array.joined(separator: separator)
-    }
-}
-
-// MARK: - effect
-
-extension ReactiveArray: Reactor {
-    func trackArrayEffects() {
-        track(reactor: self)
-    }
-
-    func triggerArrayEffects() {
-        trigger(reactor: self)
+        array.joined(separator: separator)
     }
 }
 
@@ -181,6 +172,13 @@ extension ReactiveArray: Watchable {
 // MARK: - def
 
 public func defReactive<T>(_ array: [T]) -> ReactiveArray<T> {
-    let observableArray = ReactiveArray(array: array)
-    return observableArray
+    createReactiveArray(array, mutableHandler)
+}
+
+public func defReadonly<T>(_ array: [T]) -> ReactiveArray<T> {
+    createReactiveArray(array, readonlyHandler)
+}
+
+func createReactiveArray<T>(_ array: [T], _ handler: ReactiveHandler) -> ReactiveArray<T> {
+    ReactiveArray(array: array, handler: handler)
 }

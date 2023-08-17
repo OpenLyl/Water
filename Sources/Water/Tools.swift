@@ -26,7 +26,7 @@ func areEqual(first: Any, second: Any) -> Bool {
 }
 
 // FIXME: - change the name of ==
-public func match<L, R>(lhs: L, rhs: R) -> Bool {
+public func sameValue<L, R>(lhs: L, rhs: R) -> Bool {
     guard
         let equatableLhs = lhs as? any Equatable,
         let equatableRhs = rhs as? any Equatable
@@ -35,7 +35,7 @@ public func match<L, R>(lhs: L, rhs: R) -> Bool {
     return equatableLhs.isEqual(equatableRhs)
 }
 
-public func sameObject<L, R>(lhs: L, rhs: R) -> Bool {
+public func samePointer<L, R>(lhs: L, rhs: R) -> Bool {
     let objectLhs = lhs as AnyObject
     let objectRhs = rhs as AnyObject
     return objectLhs === objectRhs
@@ -79,6 +79,10 @@ extension MemoryAddress where T: AnyObject {
     }
 }
 
-func checkObjectIsClass<T>(_ object: T) -> Bool {
+func isClass<T>(_ object: T) -> Bool {
     Mirror(reflecting: object).displayStyle == .class
+}
+
+func isStruct<T>(_ object: T) -> Bool {
+    Mirror(reflecting: object).displayStyle == .struct
 }
