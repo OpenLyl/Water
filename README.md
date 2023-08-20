@@ -469,7 +469,7 @@ func UseEditModeEnvironmentView() -> some View {
 
 ## Integration
 
-**use offical struct view style**
+**use official struct view style**
 
 ``` swift
 struct CountereView: View {
