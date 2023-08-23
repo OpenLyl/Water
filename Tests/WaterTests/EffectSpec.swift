@@ -46,6 +46,25 @@ class EffectSpec: QuickSpec {
             expect(age1).to(equal(12))
         }
         
+        it("effect with change nested object property") {
+            let foo = Foo(bar: "bar", user: User(age: 10))
+            let observed = defReactive(foo)
+            
+            var age = 0
+            var callNum = 0
+            defEffect {
+                callNum += 1
+                age = observed.user.age
+            }
+            
+            expect(callNum).to(equal(1))
+            expect(age).to(equal(10))
+            
+            observed.user.age = 11
+            expect(callNum).to(equal(2))
+            expect(age).to(equal(11))
+        }
+        
         it("effect return runner") {
             var foo = 10
             

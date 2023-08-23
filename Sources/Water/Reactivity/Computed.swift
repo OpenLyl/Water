@@ -54,6 +54,5 @@ extension ComputedValue: Reactor {
 // MARK: - def
 
 public func defComputed<T>(_ getter: @escaping ComputedGetter<T>, setter: ComputedSetter<T>? = nil) -> ComputedValue<T> {
-    let computedValue = ComputedValue(getter: getter, setter: setter)
-    return computedValue
+    ComputedValue(getter: getter, setter: setter)
 }

@@ -14,7 +14,7 @@ struct StoreUseCasesView: View {
 
 typealias CounterStoreType = () -> (count: ReactiveValue<Int>, increment: () -> Void, decrement: () -> Void)
 
-let useCounterStore: CounterStoreType = useStore("counter") {
+let useCounterStore: CounterStoreType = defStore("counter") {
     let count = defValue(0)
 
     func increment() {
@@ -25,11 +25,7 @@ let useCounterStore: CounterStoreType = useStore("counter") {
         count.value -= 1
     }
 
-    return (
-        count: count,
-        increment: increment,
-        decrement: decrement
-    )
+    return (count, increment, decrement)
 }
 
 extension StoreUseCasesView {

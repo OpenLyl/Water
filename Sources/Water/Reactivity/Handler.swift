@@ -86,8 +86,13 @@ extension ReactiveHandler {
         return reactiveObject._target[keyPath: keyPath]
     }
     
-    func handleSetProperty<T, V>(of reactiveObject: ReactiveObject<T>, at keyPath: WritableKeyPath<T, V>, with newValue: V) {
+    func handleSetProperty<T, V>(of reactiveObject: ReactiveObject<T>, at keyPath: KeyPath<T, V>, with newValue: V) {
         assert(!isReadonly, "set property at keyPath: \(keyPath) failed, becase \(reactiveObject._target) is readonly")
+        
+        guard let keyPath = keyPath as? WritableKeyPath<T, V> else {
+            assertionFailure("set value: \(newValue) at keyPath: \(keyPath) failed, maybe define your property use 'var' not 'let'")
+            return
+        }
         
         let oldValue = reactiveObject._target[keyPath: keyPath]
         if sameValue(lhs: oldValue, rhs: newValue) {

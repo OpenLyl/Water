@@ -25,18 +25,20 @@ public class ReactiveObject<T>: Reactor {
         }
     }
     
+    // FIXME: - reactive nested
     public subscript<V>(dynamicMember keyPath: KeyPath<T, V>) -> V {
         get {
-//            print("get keyPath \(keyPath)")
-            _reactiveHandler.handleGetProperty(of: self, at: keyPath)
+            print("get keyPath \(keyPath)")
+            let value = _reactiveHandler.handleGetProperty(of: self, at: keyPath)
+            if isDefined(value), let castValue = value as? ReactiveValue<V> {
+                return castValue.unwrap()
+            } else {
+                return value
+            }
         }
         set {
-//            print("set keyPath \(keyPath) - new value = \(newValue)")
-            if let keyPath = keyPath as? WritableKeyPath<T, V> {
-                _reactiveHandler.handleSetProperty(of: self, at: keyPath, with: newValue)
-            } else {
-                fatalError("the key path is not writable")
-            }
+            print("set keyPath \(keyPath) - new value = \(newValue)")
+            _reactiveHandler.handleSetProperty(of: self, at: keyPath, with: newValue)
         }
     }
     

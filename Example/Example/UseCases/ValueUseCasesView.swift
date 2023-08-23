@@ -8,12 +8,12 @@ import Water
 
 struct ValueUseCasesView: View {
     var body: some View {
-//        CounterView()
+        CounterView()
 //        CounterNameView()
 //        BooleanValueView()
 //        ValueNotChangeView()
 //        SimultaneousChangeValuesView()
-        ShowPasswordView()
+//        ShowPasswordView()
     }
 }
 

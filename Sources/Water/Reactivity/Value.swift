@@ -13,6 +13,9 @@ public class ReactiveValue<T>: Reactor {
     init(value: T, handler: ReactiveHandler) {
         _value = value
         _reactiveHandler = handler
+        if isClass(value) {
+            assertionFailure("reference class type not supported") // FIXME: need more check
+        }
     }
 
     public var value: T {

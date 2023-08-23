@@ -36,6 +36,11 @@ class ReactiveReadonlySpec: QuickSpec {
                 expect(user.isReadonly).to(equal(false))
                 expect(user.isReactive).to(equal(true))
             }
+            
+            it("check readonly is defined reactor") {
+                let user = defReadonly(User(age: 10))
+                expect(isDefined(user)).to(equal(true))
+            }
         }
         
         describe("readonly / array") {

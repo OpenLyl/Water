@@ -132,7 +132,11 @@ public func stop<T>(_ runner: ReactiveEffectRunner<T>) {
     runner.stop()
 }
 
-// MARK: - track and trigger reactor
+// MARK: - reactor
+
+public func isDefined(_ value: Any) -> Bool {
+    return value is Reactor
+}
 
 protocol Reactor: AnyObject {
     func trackEffects()
@@ -184,6 +188,8 @@ func triggerEffects(_ effects: [AnyEffect]) {
         }
     }
 }
+
+// MARK: - track and trigger effect
 
 struct ReactorEffectMap {
     let reactor: AnyReactor

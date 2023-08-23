@@ -3,6 +3,8 @@
 //  Water
 //
 
+@testable import Water
+
 struct User {
     var age: Int
 }
@@ -25,4 +27,15 @@ class ClassUser {
         self.uname = uname
         self.age = age
     }
+}
+
+struct Foo {
+    let bar: String
+    var user: User
+}
+
+struct NestedReactiveFoo {
+    let bar: String
+    let user: ReactiveObject<User>
+    let array: ReactiveArray<Int>
 }
