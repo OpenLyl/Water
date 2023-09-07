@@ -8,9 +8,9 @@
 <a href="https://discord.gg/rr5PFXEF4n"><img src="https://img.shields.io/discord/942890966652694619?logo=discord" alt="chat on Discord"></a>
 </p>
 
-<h5 align="center">English | <a href="https://github.com/OpenLyl/Water/blob/main/README_CN.md">简体中文</a></h5>
+<h5 align="center"><a href="https://github.com/OpenLyl/Water/blob/main/README.md">English</a> | 简体中文</h5>
 
-**Water** - enable you to progressively write functional SwiftUI.
+**Water** - 帮助你渐进式的组合函数式 SwiftUI 
 
 ```swift
 func CounterView() -> some View {
@@ -32,62 +32,69 @@ func CounterView() -> some View {
 
 ---
 
-* [Why use Water?](#why-use-Water)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Composables](#composables)
-* [Plugins](#plugins)
-* [Middlewares](#middlewares)
-* [Integration with existing projects](#integration-with-existing-projects)
-* [Examples](#examples)
-* [Compare with X](#compare-with-x)
-* [Community](#community)
-* [Contribution](#contribution)
-* [Thanks](#thanks)
-* [License](#license)
+* [Water 起源](#Water-起源)
+* [安装](#安装)
+* [基本用法](#基本用法)
+* [组合](#组合)
+* [插件](#插件)
+* [中间件](#中间件)
+* [项目集成](#项目集成)
+* [示例代码](#示例代码)
+* [与其他库进行对比](#与其他库进行对比)
+* [社区](#社区)
+* [贡献](#贡献)
+* [鸣谢](#鸣谢)
+* [开源协议](#开源协议)
 
 ---
 
-## Why use Water?
+## Water 起源
 
-As we all know, `SwiftUI` provides a lot of state management tools, such as: `@State`、`@StateObject`、`@Binding` ..., but these tools can be very confusing for a newbie to SwiftUI, what tool to use when exactly? Also, when the project gets complex, you will be disgusted by the screen full of `@` symbols.
+众所周知，`SwiftUI` 是一个数据驱动的响应式 UI 框架，自从发布以来，`Apple` 提供了许多属性包装器来帮助开发者管理状态，例如：`@State`、`@StateObject`、`@Binding`、`@Observable` 等。但是这些属性包装器对于初学者来说使用起来非常迷惑，到底什么时候该用哪一个呢？当不断探索掌握了它们的使用时机后，又会发现不同的属性包装器之间切换也是有成本的，例如：要把 `@State` 转换成 `@Published`，最终，随着项目复杂度提升，会发现代码中充斥着 `@` 和 `$` 符号，让代码难于阅读和维护。
 
-Now, let's see what `@` means in Swift:
+个人认为 `Swift` 语法已经过于复杂，让我们来看看一个 `@` 符号在 Swift 有哪些语法特性：
 
-- *Attribute*: `@main`、`@objc`, `@autoclosure`
-- *PropertyWrapper*: `@State`, `@StateObject`
-- *Macro*: `@Observable`
+- *特性*: `@main`、`@objc`, `@autoclosure`
+- *属性包装器*: `@State`, `@StateObject`
+- *宏*: `@Observable`
 
-For developers, all those `@` usages will place a heavy burden on the development mind.
+对于开发者来说，要区分这些符号不同的含义并且还要适时的去理解它们背后的逻辑，是有心智负担的。
 
-In my opinion, `@` also don't conform to normal programming syntax and make your code hard to read and maintain!
+基于上述情况，便开发了 `Water` 这个框架(库)。
 
-So I am trying to develop this library - **Water**. 
+当你真正开始使用 `Water` 的时候，你会发现 `Water` 不仅解决了上面的问题，更重要的是会引导你用渐进式的方式来编写 `SwiftUI` 代码，最终帮你一步步的开发出自己的独立项目。
 
-Of course, Water not only solves the above problems, but more importantly guides you through a progressive approach to writing `SwiftUI` code that will help you step-by-step towards your own standalone project.
+**Water** 设计理念如下:
 
-**Water** design for the following purposes:
+- **清爽**: 状态管理不依赖 `@` 符号，符号不参与代码逻辑
+- **清晰**: 更关注代码逻辑而非代码风格
+- **组合**: 使用组合的方式来复用代码 (支持 `MVVM`，但不推荐)
+- **自由**: 不约束编写代码的方式 (支持 `Redux` 风格，但不推荐)
+- **可维护**: 方便、可视化的测试状态逻辑
 
-- **Clear**: not require confusing `@` symbols
-- **Clean**: focus on code logic rather than code style
-- **Composable**: reuse your code use `Composable` (`MVVM` not recommend, but support)
-- **Freedom**: not constrain the way you write code (`Redux` style not recommend, but support)
-- **Maintainable**: easy and visual testing the state logic
 
-## Installation
+## 安装
+
+**Xcode**
+
+从 `Xcode` 菜单栏，选择 `File > Add Packages...`，搜索如下地址即可:
+
+```
+https://github.com/OpenLyl/Water
+```
 
 **Swift Package Manager**
 
-Add the Package url to your `Xcode` Project or `Package.swift`, finally your `Package.swift` manifest should like below:
+在 `Package.swift` 中添加库地址，配置文件参考如下：
 
 ```swift
 let package = Package(
-  name: "MyApp",
+  name: "Target",
   dependencies: [
-    .package(url: "https://github.com/OpenLyl/Water.git", .branch("main")),
+    .package(url: "https://github.com/OpenLyl/Water", .branch("main")),
   ],
   targets: [
-    .target(name: "MyApp", dependencies: [
+    .target(name: "Target", dependencies: [
       .product(name: "Water", package: "Water"),
     ]),
   ]
@@ -96,21 +103,25 @@ let package = Package(
 
 **Cocoapods**
 
-First, add the following entry in your `Podfile`:
+首先, 在 `Podfile` 中添加如下依赖描述：
 
 ```ruby
-pod 'Water', :git => 'https://github.com/OpenLyl/Water.git', :branch => 'main'
+pod 'Water'
 ```
 
-Then run `pod install`.
+然后运行 `pod install`.
 
-Finally, don't forget to import the framework with `import Water`.
+**导入**
 
-## Usage
+上面所有的安装步骤完成后, 别忘了在代码中用 `import Water` 导入。
 
-When using **Water**, you only need to consider whether your state is a `value`、 `object` or an `array`.
+## 基本用法
 
-**define value**
+当使用 **Water** 时，只需要考虑状态是`数值`、`对象`还是`数组`，定义状态如同定义变量，非常简单。
+
+**定义数值**
+
+定义数值使用 `defValue`，这时候数值被包装了一层，所以获取和赋值的时候，要使用 `.value`，示例如下：
 
 ```swift
 func UserView() -> some View {
@@ -127,7 +138,9 @@ func UserView() -> some View {
 }
 ```
 
-**define object**
+**定义对象**
+
+定义对象使用 `defReactive`，这里的对象可以是 `结构体` 或 `类`，两种对象的定义方式都是支持的。
 
 ```swift
 struct User {
@@ -157,7 +170,9 @@ func UserView() -> some View {
 }
 ```
 
-**define array**
+**定义数组**
+
+定义数组也使用 `defReactive`，就跟定义对象一样简单。
 
 ```swift
 func NumberListView() -> some View {
@@ -193,9 +208,9 @@ func NumberListView() -> some View {
 }
 ```
 
-**define watch**
+**状态监听**
 
-**Water** also has the ability to listen for data changes and quickly select useful states by using `defWatch`.
+**Water** 具备监听数据状态变化的能力，这样方便有选择的进行数据响应式处理，使用 `defWatch` 来定义。
 
 ```swift
 func WatchEffectView() -> some View {
@@ -223,9 +238,9 @@ func WatchEffectView() -> some View {
 }
 ```
 
-**define computed**
+**计算属性**
 
-In most cases, you can use Swift native computed property directly to pick the defined states.
+通常情况下，直接使用 `Swift` 原生的计算属性就可以获取 `UI` 需要的状态数据。
 
 ```swift
 let user = defineReactive(User(name: "hello", age: 18))
@@ -239,7 +254,7 @@ var displayAge: String {
 }
 ```
 
-outside of this，**Water** also provide the cacheable computed property, when there are complex data processing, use `defComputed`.
+除此之外，**Water** 还提供了可缓存的计算属性，用于处理复杂的数据筛选操作，使用 `defComputed`。
 
 ```swift
 func FilterNumbersView() -> some View {
@@ -268,13 +283,17 @@ func FilterNumbersView() -> some View {
 }
 ```
 
-## Composables
+**状态嵌套**
 
-Once all the states become reactive, use composable way to extract the data logic is so natural.
+`编写中`
+
+## 组合
+
+一旦所有的状态都原子化且可响应，用组合的方式来抽离代码逻辑就变得顺理成章，**Water** 会把组合代码的辅助函数封装起来，它们都以 `use` 开头。
 
 **useReducer**
 
-`useReducer` allow you code `SwiftUI` in `Redux` style, very similar to [swift-composable-architecture](https://github.com/pointfreeco/swift-composable-architecture).
+`useReducer` 会让你方便的写出 `Redux` 风格的代码，非常类似于 **TCA**。
 
 ```swift
 struct CountState {
@@ -314,7 +333,7 @@ func ReducerCounterView() -> some View {
 
 **useStore**
 
-`useStore` will be more powerful than `useReducer`, it's still under development.
+`useStore` 将会是 `userReducer` 的增强版，而且支持 `Store` 的拆分和组合, 还在开发中。
 
 ```swift
 let useCounterStore = defStore("counter") {
@@ -350,17 +369,19 @@ func StoreCountView() -> some View {
 
 **useFetch**
 
-`useFetch` provides the ability to send http restful requests and final fetch the network result data, now is a simple version, it will be more flexible and powerful in the future.
+`useFetch` 提供了发送 `resultful` 风格 `http` 请求的能力，方便从网络动态获取数据进行展示。当前是一个开发中的版本。
 
 ```swift
-func UseFetchView() -> some View {
-    let (isFetching, error, data) = useFetch(url: "https://httpbin.org/get")
+func UseFetchUseCasesView() -> some View {
+    let (isFetching, result, error, _) = useFetch(url: "https://httpbin.org/get")
     
     return View {
         VStack {
             Text(isFetching.value ? "is fetching" : "fetch completed")
-            Text("error = \(error.value)")
-            if let data = data.value, let responseString = String(data: data, encoding: .utf8) {
+            if let error = error.value {
+                Text("error = \(error.errorDescription ?? "no error")")
+            }
+            if let result = result.value, let responseString = result.mapString() {
                 Text("data is \(responseString)")
             }
         }
@@ -368,9 +389,21 @@ func UseFetchView() -> some View {
 }
 ```
 
+`useFetch` 还支持手动触发执行时机
+
+```swift
+let (isFetching, result, error, execute) = useFetch({ "http://www.numbersapi.com/\(count.value)" }, immediate: false)
+
+func sendRequest() {
+    Task {
+        await execute()
+    }
+}
+```
+
 **useAsyncState**
 
-`useAsyncState` provides the ability to use state from existing async context. sometimes, it's more useful than `useFetch`.
+`useAsyncState` 能够将已有的通过异步方式获取的状态转变成响应式的状态，在很多情况下，它要比 `useFetch` 更有用。
 
 ```swift
 struct Todo: Codable {
@@ -404,7 +437,7 @@ func UseAsyncStateView() -> some View {
 
 **useEnvironment**
 
-The following code shows how to get the system environment on demand, it's equivalent to `@Environment(\.dismiss) private var dismiss`.
+以下代码展示了如何按需获取 `SwiftUI` 系统变量，等价于 `@Environment(\.dismiss) private var dismiss`。
 
 ```swift
 func UseEnvironmentView() -> some View {
@@ -429,7 +462,7 @@ func UseEnvironmentView() -> some View {
 }
 ```
 
-can also use `.bindable` to keep sync with system bindable environment.
+也可以使用 `.bindable` 与系统变量保持同步。
 
 ```swift
 func UseEditModeEnvironmentView() -> some View {
@@ -455,23 +488,24 @@ func UseEditModeEnvironmentView() -> some View {
 
 **useRouter**
 
-`under development`
+`开发中`
 
-## Build your own composable
+**Build your own composable**
 
-`under writing`
+`编写中`
 
-## Plugins
 
-`under development`
+## 插件
 
-## Middlewares
+`开发中`
 
-`under development`
+## 中间件
 
-## Integration
+`开发中`
 
-**use official struct view style**
+## 项目集成
+
+**与标准写法代码集成**
 
 ``` swift
 struct CountereView: View {
@@ -491,13 +525,13 @@ struct CountereView: View {
         }
     }
 }
-````
+```
 
-**integrate with other SwfitUI views**
+**与其他风格代码集成**
 
-`under writing`
+`编写中`
 
-## Examples
+## 示例代码
 
 - [UseCases](./Example/Example/UseCases)
     - ValueUseCases
@@ -517,41 +551,41 @@ struct CountereView: View {
 - Garden (Mastodon client) - under development
 - Other TCA examples - under development
 
-## Compare with X
+## 与其他库进行对比
 
-**compare with swift-composable-architecture**
+**对比 TCA**
 
-`under writing`
+`编写中`
 
-## Community
+## 社区
 
-If you want to discuss **Water** or have a question about how to use it to solve a particular problem, you can join the discord channel:
+如果想讨论、交流 **Water**，可以加入 `discord` 频道：
 
 [![Discord](https://discordapp.com/api/guilds/942890966652694619/widget.png?style=banner2)](https://discord.gg/rr5PFXEF4n)
 
-## Thanks
+## 贡献
 
-This project is heavily inspired by the following awesome projects.
+**Water** 目前只实现了一个基本的 `MVP`，不建议直接在线上产品中使用，后续工作方向如下：
+
+- 为响应式提供更多的辅助函数
+- `组合` 只是刚刚开始，还有很多场景和逻辑要处理
+- 提供更多的示例代码和教程
+- 为代码编写完备的注释
+- 添加更多的单元测试，提高测试覆盖率
+- 为测试用例提供快照测试
+- 性能测试
+
+如果大家对这个项目感兴趣，欢迎加入我们，一起来做一些有意思的事情！
+
+## 鸣谢
+
+此项目灵感来源于以下项目，在此表示感谢：
 
 - [react](https://github.com/facebook/react)
 - [vue](https://github.com/vuejs/core)
 - [vueuse](https://github.com/vueuse/vueuse)
 - [swiftui-hooks](https://github.com/ra1028/swiftui-hooks)
 
-## Contribution
+## 开源协议
 
-**Water** is only a basic MVP at this point and is not recommended for online products, there are still some areas that need to be worked on, as follows:
-
-- need more util functions to handle reactivity system
-- `Composables` is just getting started, need more logic to handle complex situations
-- add more unit test and improve the test coverage
-- write more use cases with snapshot test
-- write more example apps and tutorials
-- code with more comments
-- performance test
-
-so if you are interested in this project, please join us for something fun!
-
-## License
-
-This library is released under the MIT license. See [LICENSE](https://github.com/OpenLyl/Water/blob/main/LICENSE) for details.
+此库在 MIT 协议下开源。参见 [LICENSE](https://github.com/OpenLyl/Water/blob/main/LICENSE)。
