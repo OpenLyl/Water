@@ -10,7 +10,7 @@
 
 <h5 align="center">English | <a href="https://github.com/OpenLyl/Water/blob/main/README_CN.md">简体中文</a></h5>
 
-**Water** - enable you to progressively write functional SwiftUI.
+**Water** - help you to progressively write functional SwiftUI.
 
 ```swift
 func CounterView() -> some View {
@@ -50,7 +50,7 @@ func CounterView() -> some View {
 
 ## Why use Water?
 
-As we all know, `SwiftUI` provides a lot of state management tools, such as: `@State`、`@StateObject`、`@Binding` ..., but these tools can be very confusing for a newbie to SwiftUI, what tool to use when exactly? Also, when the project gets complex, you will be disgusted by the screen full of `@` symbols.
+As we all know, `SwiftUI` is a data-driven responsive UI framework. Apple provides a lot of state management tools, such as: `@State`、`@StateObject`、`@Binding`、`@Observable` ..., but these tools can be very confusing for a newbie to SwiftUI, what tool to use when exactly? when master all these tools, switch between them also has a big const. finally, when the project gets complex, the screen full of `@` and `$` symbols make the code difficult to maintain and read.
 
 Now, let's see what `@` means in Swift:
 
@@ -60,8 +60,6 @@ Now, let's see what `@` means in Swift:
 
 For developers, all those `@` usages will place a heavy burden on the development mind.
 
-In my opinion, `@` also don't conform to normal programming syntax and make your code hard to read and maintain!
-
 So I am trying to develop this library - **Water**. 
 
 Of course, Water not only solves the above problems, but more importantly guides you through a progressive approach to writing `SwiftUI` code that will help you step-by-step towards your own standalone project.
@@ -70,21 +68,29 @@ Of course, Water not only solves the above problems, but more importantly guides
 
 - **Clear**: not require confusing `@` symbols
 - **Clean**: focus on code logic rather than code style
-- **Composable**: reuse your code use `Composable` (`MVVM` not recommend, but support)
-- **Freedom**: not constrain the way you write code (`Redux` style not recommend, but support)
+- **Composable**: reuse your code use `Composable` (support `MVVM`, not recommend)
+- **Freedom**: not constrain the way you write code (support `Redux` style, not recommend)
 - **Maintainable**: easy and visual testing the state logic
 
 ## Installation
 
+**Xcode**
+
+From Xcode menu: `File > Add Packages...`:
+
+```
+https://github.com/OpenLyl/Water
+```
+
 **Swift Package Manager**
 
-Add the Package url to your `Xcode` Project or `Package.swift`, finally your `Package.swift` manifest should like below:
+Add the Package url to `Package.swift`, finally your `Package.swift` manifest should like below:
 
 ```swift
 let package = Package(
   name: "MyApp",
   dependencies: [
-    .package(url: "https://github.com/OpenLyl/Water.git", .branch("main")),
+    .package(url: "https://github.com/OpenLyl/Water", .branch("main")),
   ],
   targets: [
     .target(name: "MyApp", dependencies: [
@@ -104,13 +110,17 @@ pod 'Water', :git => 'https://github.com/OpenLyl/Water.git', :branch => 'main'
 
 Then run `pod install`.
 
+**Import**
+
 Finally, don't forget to import the framework with `import Water`.
 
 ## Usage
 
-When using **Water**, you only need to consider whether your state is a `value`、 `object` or an `array`.
+When using **Water**, you only need to consider whether your state is a `value`、 `object` or an `array`, define state is like defining variable, so simple.
 
 **define value**
+
+use `defValue` to define a value state, because the value is wrapped in a box, so use `.value` to get or set the value:
 
 ```swift
 func UserView() -> some View {
@@ -128,6 +138,8 @@ func UserView() -> some View {
 ```
 
 **define object**
+
+use `defReactive` to change object reactivity, support `struct` and `class`.
 
 ```swift
 struct User {
@@ -158,6 +170,8 @@ func UserView() -> some View {
 ```
 
 **define array**
+
+To make array reactivity also use `defReactive`, as simple as define object.
 
 ```swift
 func NumberListView() -> some View {
@@ -268,13 +282,17 @@ func FilterNumbersView() -> some View {
 }
 ```
 
+**nested state**
+
+`under writing`
+
 ## Composables
 
 Once all the states become reactive, use composable way to extract the data logic is so natural.
 
 **useReducer**
 
-`useReducer` allow you code `SwiftUI` in `Redux` style, very similar to [swift-composable-architecture](https://github.com/pointfreeco/swift-composable-architecture).
+`useReducer` allow you code `SwiftUI` in `Redux` style, very similar to **TCA**.
 
 ```swift
 struct CountState {
@@ -359,11 +377,25 @@ func UseFetchView() -> some View {
     return View {
         VStack {
             Text(isFetching.value ? "is fetching" : "fetch completed")
-            Text("error = \(error.value)")
-            if let data = data.value, let responseString = String(data: data, encoding: .utf8) {
+            if let error = error.value {
+                Text("error = \(error.errorDescription ?? "no error")")
+            }
+            if let result = result.value, let responseString = result.mapString() {
                 Text("data is \(responseString)")
             }
         }
+    }
+}
+```
+
+`useFetch` also support manual trigger send request.
+
+```swift
+let (isFetching, result, error, execute) = useFetch({ "http://www.numbersapi.com/\(count.value)" }, immediate: false)
+
+func sendRequest() {
+    Task {
+        await execute()
     }
 }
 ```
@@ -491,7 +523,7 @@ struct CountereView: View {
         }
     }
 }
-````
+```
 
 **integrate with other SwfitUI views**
 
@@ -519,7 +551,7 @@ struct CountereView: View {
 
 ## Compare with X
 
-**compare with swift-composable-architecture**
+**compare with TCA**
 
 `under writing`
 
@@ -528,15 +560,6 @@ struct CountereView: View {
 If you want to discuss **Water** or have a question about how to use it to solve a particular problem, you can join the discord channel:
 
 [![Discord](https://discordapp.com/api/guilds/942890966652694619/widget.png?style=banner2)](https://discord.gg/rr5PFXEF4n)
-
-## Thanks
-
-This project is heavily inspired by the following awesome projects.
-
-- [react](https://github.com/facebook/react)
-- [vue](https://github.com/vuejs/core)
-- [vueuse](https://github.com/vueuse/vueuse)
-- [swiftui-hooks](https://github.com/ra1028/swiftui-hooks)
 
 ## Contribution
 
@@ -551,6 +574,15 @@ This project is heavily inspired by the following awesome projects.
 - performance test
 
 so if you are interested in this project, please join us for something fun!
+
+## Thanks
+
+This project is heavily inspired by the following awesome projects.
+
+- [react](https://github.com/facebook/react)
+- [vue](https://github.com/vuejs/core)
+- [vueuse](https://github.com/vueuse/vueuse)
+- [swiftui-hooks](https://github.com/ra1028/swiftui-hooks)
 
 ## License
 
