@@ -13,9 +13,6 @@ public class ReactiveValue<T>: Reactor {
     init(value: T, handler: ReactiveHandler) {
         _value = value
         _reactiveHandler = handler
-        if isClass(value) {
-            assertionFailure("reference class type not supported") // FIXME: need more check
-        }
     }
 
     public var value: T {
@@ -47,7 +44,13 @@ extension ReactiveValue: Watchable {
 // MARK: - def
 
 public func defValue<T>(_ value: T) -> ReactiveValue<T> {
-    ReactiveValue(value: value, handler: mutableHandler)
+    if value is ReactiveValue<T> {
+        assertionFailure("can not nested reactive value") // TODO: - check it
+    }
+    if isClass(value) {
+        assertionFailure("reference class type not supported") // FIXME: need more check
+    }
+    return ReactiveValue(value: value, handler: mutableHandler)
 }
 
 // TODO: - def value return getter setter function like react hooks

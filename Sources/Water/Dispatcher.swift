@@ -29,6 +29,7 @@ class Dispatcher: ObservableObject {
 //    var stateStore: [Int: StateStorage] = [:]
 
 //    var pendingEffects: [HookEffect] = [] // FIXME: - clear the effects
+    var trackingEffects: [AnyEffect] = []
     var currentEffectCursor = 0
 //    var effectStore: [Int: EffectStorage] = [:]
 
@@ -37,6 +38,9 @@ class Dispatcher: ObservableObject {
     var keyPathEnvironments: [AnyKeyPath: Any] = [:]
 
     var isScheduling = false
+    
+    var mountHook: (() -> Void)? = nil
+    var unmountdHook: (() -> Void)? = nil
 
     init() {
 //        print("hook state object init")
@@ -50,9 +54,11 @@ class Dispatcher: ObservableObject {
     // define effect without run effect fn
     // FIXME: return ReactiveEffect<()>
     func setupRenderEffect() -> any Effectable {
-        return ReactiveEffect {
+        let effect = ReactiveEffect {
             self.updateView()
         }
+        trackingEffects.append(effect)
+        return effect
     }
 
     func tryCleanupRenderEffect() {
@@ -69,6 +75,9 @@ class Dispatcher: ObservableObject {
 //        pendingEffects.removeAll()
         currentEffectCursor = 0
 //        effectStore.removeAll()
+        
+        trackingEffects.forEach { $0.stop() }
+        trackingEffects.removeAll()
     }
 
     func updateView() {

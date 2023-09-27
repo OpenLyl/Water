@@ -104,13 +104,11 @@ func RootView() -> some View {
 }
 
 func MemoStudentNameView(student: Student) -> some View {
-    Memo(student) { student in
-        Text(student.name)
-    }
+    memo(student) { Text($0.name) }
 }
 
 func TransformStudentNameView(student: Student) -> some View {
-    Memo(student) { name in
+    memo(student) { name in
         Text(name)
     } transfomer: { s in
         s.name
@@ -118,15 +116,11 @@ func TransformStudentNameView(student: Student) -> some View {
 }
 
 func StudentNameView(name: String) -> some View {
-    Memo(name) { name in
-        Text(name)
-    }
+    memo(name) { Text($0) }
 }
 
 func StudentAgeView(age: Int) -> some View {
-    Memo(age) { age in
-        Text(age, format: .number)
-    }
+    memo(age) { Text($0, format: .number) }
 }
 
 //class MyStore: ObservableObject {
@@ -211,7 +205,7 @@ func ClosureDemo() -> some View {
 
 // FIXME: - change binding no effect problem
 func BindingCellView(id: Int, @Binding selection: Int) -> some View {
-    Memo(id) { id in
+    memo(id) { id in
         VStack {
             Button("ID: \(id)") {
                 selection = id
@@ -221,7 +215,7 @@ func BindingCellView(id: Int, @Binding selection: Int) -> some View {
 }
 
 func CellView(id: Int, action: @escaping () -> Void) -> some View {
-    Memo(id) { id in
+    memo(id) { id in
         VStack {
             let _ = print("update \(id)")
             Button("ID: \(id)") {
@@ -232,7 +226,7 @@ func CellView(id: Int, action: @escaping () -> Void) -> some View {
 }
 
 func CellView(id: Int, action: @escaping (Int) -> Void) -> some View {
-    Memo(id) { id in
+    memo(id) { id in
         VStack {
             let _ = print("update \(id)")
             Button("ID: \(id)") {

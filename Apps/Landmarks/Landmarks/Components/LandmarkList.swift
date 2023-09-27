@@ -33,7 +33,7 @@ import Water
 // TODO: - test this in home computer
 // Landmark is Hashable
 func LandmarkRow(landmark: Landmark) -> some View {
-    Memo(landmark) { landmark in
+    memo(landmark) { landmark in
         HStack {
             Image(landmark.imageName)
                 .resizable()

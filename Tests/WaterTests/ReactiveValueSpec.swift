@@ -78,5 +78,10 @@ class ReactiveValueSpec: QuickSpec {
 //            foo.name = "123"
 //            expect(foo.name).to(equal("123"))
         }
+        
+        it("value nested value") {
+            let count = defValue(10)
+            expect { defValue(count) }.to(throwAssertion())
+        }
     }
 }

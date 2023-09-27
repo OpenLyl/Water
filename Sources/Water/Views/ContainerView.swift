@@ -25,6 +25,8 @@ public struct ContainerView<Content: View>: View {
     }
 
     public var body: some View {
+        dispatcher.clear() // FIXME: - this can move to disappear ?
+        
         dispatcher.isScheduling = true
         
         let renderEffect = dispatcher.setupRenderEffect() // FIXME: - only set active effect, change it use scheduler or runner
@@ -40,7 +42,7 @@ public struct ContainerView<Content: View>: View {
         let content = content()
 
         // FIXME: - memory leaks
-        dispatcher.currentEffectCursor = 0
+//        dispatcher.currentEffectCursor = 0
 //        dispatcher.pendingEffects.forEach {
 //            $0.resolve(by: dispatcher)
 //        }
@@ -52,15 +54,23 @@ public struct ContainerView<Content: View>: View {
         
         dispatcher.isScheduling = false
 
-        dispatcher.tryCleanupRenderEffect()
+//        dispatcher.tryCleanupRenderEffect()
+        
         return content
-            .onAppear {
-                actionOnApear()
-            }
+            .onAppear(perform: actionOnAppear)
+            .onDisappear(perform: actionOnDisappear)
     }
     
-    func actionOnApear() {
+    func actionOnAppear() {
+        //        print("\(identifier) - on appear")
+        dispatcher.mountHook?()
     }
+    
+    func actionOnDisappear() {
+        //        print("\(identifier) - on dis appear")
+        dispatcher.unmountdHook?()
+    }
+
 
     // TODO: - next idea - use my own observation
 //    var body: some View {

@@ -49,6 +49,12 @@ extension ValueUseCasesView {
             }
         }
     }
+    
+    // FIXME: - test use ViewInspector
+    func testCounterView() {
+        let counterView = CounterView()
+        
+    }
 }
 
 extension ValueUseCasesView {

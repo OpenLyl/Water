@@ -7,13 +7,15 @@ import SwiftUI
 import Water
 
 func UseFetchUseCasesView() -> some View {
-    let (isFetching, error, data) = useFetch(url: "https://httpbin.org/get")
+    let (isFetching, result, error, _) = useFetch(url: "https://httpbin.org/get")
     
     return View {
         VStack {
             Text(isFetching.value ? "is fetching" : "fetch completed")
-            Text("error = \(error.value)")
-            if let data = data.value, let responseString = String(data: data, encoding: .utf8) {
+            if let error = error.value {
+                Text("error = \(error.errorDescription ?? "no error")")
+            }
+            if let result = result.value, let responseString = result.mapString() {
                 Text("data is \(responseString)")
             }
         }

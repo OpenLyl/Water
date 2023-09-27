@@ -38,7 +38,7 @@ struct UseEnvironmentViewModifier<Value>: ViewModifier {
     private let keyPath: KeyPath<EnvironmentValues, Value>
     private var dispatcher: Dispatcher
 
-    private let environment: Environment<Value>
+    private let environment: Environment<Value> // dynamic inject by system
 
     init(keyPath: KeyPath<EnvironmentValues, Value>, dispatcher: Dispatcher) {
         self.keyPath = keyPath

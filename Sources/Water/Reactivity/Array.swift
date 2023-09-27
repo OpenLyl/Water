@@ -5,12 +5,15 @@
 
 import Foundation
 
-public class ReactiveArray<T>: RandomAccessCollection, Reactor {
+public protocol ReactiveCollection: Collection {
+    var array: [Element] { get set }
+}
+
+public class ReactiveArray<T>: ReactiveCollection, Reactor {
     public typealias Element = T
 
     var _array: [T]
     var _reactiveHandler: ReactiveHandler
-
 
     init(array: [T], handler: ReactiveHandler) {
         _array = array
