@@ -86,6 +86,10 @@ extension ReactiveObject: Watchable {
 
 // MARK: - def
 
+public func def<T>(object: T) -> ReactiveObject<T> {
+    createReactiveObject(object, mutableHandler)
+}
+
 public func defReactive<T>(_ target: T) -> ReactiveObject<T> {
     createReactiveObject(target, mutableHandler)
 }

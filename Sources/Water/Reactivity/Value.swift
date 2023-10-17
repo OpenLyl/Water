@@ -43,6 +43,10 @@ extension ReactiveValue: Watchable {
 
 // MARK: - def
 
+public func def<T>(value: T) -> ReactiveValue<T> {
+    defValue(value)
+}
+
 public func defValue<T>(_ value: T) -> ReactiveValue<T> {
     if value is ReactiveValue<T> {
         assertionFailure("can not nested reactive value") // TODO: - check it

@@ -174,6 +174,10 @@ extension ReactiveArray: Watchable {
 
 // MARK: - def
 
+public func def<T>(array: [T])  -> ReactiveArray<T> {
+    createReactiveArray(array, mutableHandler)
+}
+
 public func defReactive<T>(_ array: [T]) -> ReactiveArray<T> {
     createReactiveArray(array, mutableHandler)
 }

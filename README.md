@@ -14,7 +14,7 @@
 
 ```swift
 func CounterView() -> some View {
-    let count = defValue(0)
+    let count = def(value: 0)
 
     return View {
         Text("\(count.value)")
@@ -120,12 +120,12 @@ When using **Water**, you only need to consider whether your state is a `value`ã
 
 **define value**
 
-use `defValue` to define a value state, because the value is wrapped in a box, so use `.value` to get or set the value:
+use `def(value: )` to define a value state, because the value is wrapped in a box, so use `.value` to get or set the value:
 
 ```swift
 func UserView() -> some View {
-    let name = defValue("jack")
-    let age = defValue(20)
+    let name = def(value: "jack")
+    let age = def(value: 20)
     
     return View {
         Text("\(name.value)'s age = \(age.value)")
@@ -139,7 +139,7 @@ func UserView() -> some View {
 
 **define object**
 
-use `defReactive` to change object reactivity, support `struct` and `class`.
+use `def(object: )` to change object reactivity, support `struct` and `class`.
 
 ```swift
 struct User {
@@ -150,7 +150,7 @@ struct User {
 
 ```swift
 func UserView() -> some View {
-    let user = defReactive(User(name: "jack", age: 20))
+    let user = def(object: User(name: "jack", age: 20))
     
     return View {
         VStack {
@@ -171,14 +171,14 @@ func UserView() -> some View {
 
 **define array**
 
-To make array reactivity also use `defReactive`, as simple as define object.
+To make array reactivity use `def(array: )`, as simple as define object.
 
 ```swift
 func NumberListView() -> some View {
     let array = ["1", "2", "3"]
     var nextIndex = array.count + 1
 
-    let items = defReactive(array)
+    let items = def(array: array)
 
     return View {
         VStack {
@@ -213,8 +213,8 @@ func NumberListView() -> some View {
 
 ```swift
 func WatchEffectView() -> some View {
-    let count = defValue(0)
-    let name = defValue("some name")
+    let count = def(value: 0)
+    let name = def(value: "some name")
     
     defWatchEffect { _ in
         // declare a side effect
@@ -242,7 +242,7 @@ func WatchEffectView() -> some View {
 In most cases, you can use Swift native computed property directly to pick the defined states.
 
 ```swift
-let user = defineReactive(User(name: "hello", age: 18))
+let user = def(object: User(name: "hello", age: 18))
 
 var displayName: String {
     "name is \(user.name)"
@@ -257,8 +257,8 @@ outside of thisï¼Œ**Water** also provide the cacheable computed property, when t
 
 ```swift
 func FilterNumbersView() -> some View {
-    let showEven = defValue(false)
-    let items = defReactive([1, 2, 3, 4, 5, 6])
+    let showEven = def(value: false)
+    let items = def(array: [1, 2, 3, 4, 5, 6])
     
     let evenNumbers = defComputed {
         items.filter { !showEven.value || $0 % 2 == 0}
@@ -336,7 +336,7 @@ func ReducerCounterView() -> some View {
 
 ```swift
 let useCounterStore = defStore("counter") {
-    let count = defValue(0)
+    let count = def(value: 0)
 
     func increment() {
         count.value += 1
@@ -441,7 +441,7 @@ The following code shows how to get the system environment on demand, it's equiv
 ```swift
 func UseEnvironmentView() -> some View {
     let dismiss = useEnvironment(\.dismiss)
-    let count = defValue(0)
+    let count = def(value: 0)
     
     return View {
         VStack {
@@ -465,8 +465,8 @@ can also use `.bindable` to keep sync with system bindable environment.
 
 ```swift
 func UseEditModeEnvironmentView() -> some View {
-    let name = defValue("hello word edit mode")
-    let editMode = defValue(EditMode.inactive)
+    let name = def(value: "hello word edit mode")
+    let editMode = def(value: EditMode.inactive)
     
     return View {
         Form {
@@ -507,7 +507,7 @@ func UseEditModeEnvironmentView() -> some View {
 
 ``` swift
 struct CountereView: View {
-    let count = defValue(0)
+    let count = def(value: 0)
 
     var body: some View {
         Water.View { // will change in future

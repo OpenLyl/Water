@@ -14,7 +14,7 @@
 
 ```swift
 func CounterView() -> some View {
-    let count = defValue(0)
+    let count = def(value: 0)
 
     return View {
         Text("\(count.value)")
@@ -121,12 +121,12 @@ pod 'Water'
 
 **定义数值**
 
-定义数值使用 `defValue`，这时候数值被包装了一层，所以获取和赋值的时候，要使用 `.value`，示例如下：
+定义数值使用 `def(value: )`，这时候数值被包装了一层，所以获取和赋值的时候，要使用 `.value`，示例如下：
 
 ```swift
 func UserView() -> some View {
-    let name = defValue("jack")
-    let age = defValue(20)
+    let name = def(value: "jack")
+    let age = def(value: 20)
     
     return View {
         Text("\(name.value)'s age = \(age.value)")
@@ -140,7 +140,7 @@ func UserView() -> some View {
 
 **定义对象**
 
-定义对象使用 `defReactive`，这里的对象可以是 `结构体` 或 `类`，两种对象的定义方式都是支持的。
+定义对象使用 `def(object: )`，这里的对象可以是 `结构体` 或 `类`，两种对象的定义方式都是支持的。
 
 ```swift
 struct User {
@@ -151,7 +151,7 @@ struct User {
 
 ```swift
 func UserView() -> some View {
-    let user = defReactive(User(name: "jack", age: 20))
+    let user = def(object: User(name: "jack", age: 20))
     
     return View {
         VStack {
@@ -172,14 +172,14 @@ func UserView() -> some View {
 
 **定义数组**
 
-定义数组也使用 `defReactive`，就跟定义对象一样简单。
+定义数组使用 `def(array: )`，就跟定义对象一样简单。
 
 ```swift
 func NumberListView() -> some View {
     let array = ["1", "2", "3"]
     var nextIndex = array.count + 1
 
-    let items = defReactive(array)
+    let items = def(array: array)
 
     return View {
         VStack {
@@ -214,8 +214,8 @@ func NumberListView() -> some View {
 
 ```swift
 func WatchEffectView() -> some View {
-    let count = defValue(0)
-    let name = defValue("some name")
+    let count = def(value: 0)
+    let name = def(value: "some name")
     
     defWatchEffect { _ in
         // declare a side effect
@@ -243,7 +243,7 @@ func WatchEffectView() -> some View {
 通常情况下，直接使用 `Swift` 原生的计算属性就可以获取 `UI` 需要的状态数据。
 
 ```swift
-let user = defineReactive(User(name: "hello", age: 18))
+let user = def(object: User(name: "hello", age: 18))
 
 var displayName: String {
     "name is \(user.name)"
@@ -258,8 +258,8 @@ var displayAge: String {
 
 ```swift
 func FilterNumbersView() -> some View {
-    let showEven = defValue(false)
-    let items = defReactive([1, 2, 3, 4, 5, 6])
+    let showEven = def(value: false)
+    let items = def(array: [1, 2, 3, 4, 5, 6])
     
     let evenNumbers = defComputed {
         items.filter { !showEven.value || $0 % 2 == 0}
@@ -337,7 +337,7 @@ func ReducerCounterView() -> some View {
 
 ```swift
 let useCounterStore = defStore("counter") {
-    let count = defValue(0)
+    let count = def(value: 0)
 
     func increment() {
         count.value += 1
@@ -442,7 +442,7 @@ func UseAsyncStateView() -> some View {
 ```swift
 func UseEnvironmentView() -> some View {
     let dismiss = useEnvironment(\.dismiss)
-    let count = defValue(0)
+    let count = def(value: 0)
     
     return View {
         VStack {
@@ -466,8 +466,8 @@ func UseEnvironmentView() -> some View {
 
 ```swift
 func UseEditModeEnvironmentView() -> some View {
-    let name = defValue("hello word edit mode")
-    let editMode = defValue(EditMode.inactive)
+    let name = def(value: "hello word edit mode")
+    let editMode = def(value: EditMode.inactive)
     
     return View {
         Form {
@@ -509,7 +509,7 @@ func UseEditModeEnvironmentView() -> some View {
 
 ``` swift
 struct CountereView: View {
-    let count = defValue(0)
+    let count = def(value: 0)
 
     var body: some View {
         Water.View { // will change in future
